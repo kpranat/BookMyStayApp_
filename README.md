@@ -43,3 +43,41 @@ Use Case 1: Application Entry & Welcome Message
 1. Clear and predictable application startup behavior
 2. Single, well-defined execution entry point
 3. Improved debuggability during early development
+
+Use Case 2: Basic Room Types & Static Availability
+-
+**Goal:** Introduce object modeling through inheritance and abstraction before introducing data structures, allowing students to focus on domain design rather than optimization.
+
+**Actor:** User – runs the application to view predefined room types and their availability.
+
+**Flow:**
+
+1. User runs the application.
+2. Room objects representing different room types are created.
+3. Availability for each room type is stored using simple variables.
+4. Room details and availability information are printed to the console.
+5. Application terminates.
+
+**Key Concepts Used**
+1. Abstract Class - An abstract class is used to represent a generalized concept that should not be instantiated directly. The Room class defines common attributes and behavior shared by all room types while enforcing a consistent structure.
+2. Inheritance - Concrete room classes (SingleRoom, DoubleRoom, SuiteRoom) extend the abstract Room class. This allows shared properties to be reused while enabling specialization for each room type.
+3. Polymorphism - Room objects are referenced using the Room type, enabling uniform handling of different room implementations. This prepares the system for future extensibility without changing client code.
+4. Encapsulation - Room attributes such as number of beds, size, and price are encapsulated within the Room class. This ensures that room characteristics are controlled and modified only through defined behavior.
+5. Static Availability Representation - Room availability is stored using simple variables rather than data structures. This intentionally highlights the limitations of hardcoded and scattered state management.
+6. Separation of Domain and State - Room objects represent what a room is, while availability variables represent current system state. This distinction becomes critical when inventory management is introduced later.
+
+**Key Requirements**
+1. Define an abstract Room class with common attributes.
+2. Create concrete room classes for Single, Double, and Suite rooms.
+3. Initialize room objects in the application entry point.
+4. Store room availability using individual variables.
+5. Display room details and availability to the console.
+
+**Key Benefits**
+1. Clear introduction to object-oriented domain modeling
+2. Demonstrates inheritance and abstraction in a real-world context
+3. Establishes a strong foundation for later inventory refactoring
+
+**Drawbacks of Previous Use Case**
+1. Use Case 1 focused only on application startup and execution flow.
+2. No domain modeling or business concepts were introduced, limiting system realism.
