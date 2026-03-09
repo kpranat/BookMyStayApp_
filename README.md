@@ -81,3 +81,41 @@ Use Case 2: Basic Room Types & Static Availability
 **Drawbacks of Previous Use Case**
 1. Use Case 1 focused only on application startup and execution flow.
 2. No domain modeling or business concepts were introduced, limiting system realism.
+
+Use Case 3: Centralized Room Inventory Management
+-
+**Goal:** Introduce centralized inventory management by replacing scattered availability variables with a single, consistent data structure, demonstrating how HashMap solves real-world state management problems.
+
+**Actor:** RoomInventory – responsible for managing and exposing room availability across the system.
+
+**Flow:**
+1. The system initializes the inventory component.
+2. Room types are registered with their available counts.
+3. Availability is stored and retrieved from a centralized HashMap.
+4. Updates to availability are performed through controlled methods.
+5. The current inventory state is displayed when requested.
+
+**Key Concepts Used**
+1. Problem of Scattered State - In the previous use case, availability was stored in separate variables. This leads to inconsistent updates, duplication, and poor scalability as the system grows.
+2. HashMap - HashMap<String, Integer> is used to map room types to available room counts. This allows fast access, updates, and lookups based on a logical key.
+3. O(1) Lookup - HashMap provides average constant-time complexity for get and put operations. This makes it suitable for systems that require frequent availability checks.
+4. Single Source of Truth - All availability data is maintained in one centralized structure. This eliminates discrepancies caused by multiple variables representing the same state.
+5. Encapsulation of Inventory Logic - Inventory-related operations are encapsulated within a dedicated class. Other parts of the system interact with inventory only through exposed methods, reducing coupling.
+6. Separation of Concerns - Inventory manages how many rooms are available, not what a room is. Room characteristics such as price and size remain part of the Room domain model.
+7. Scalability - Adding a new room type requires only inserting a new entry into the map. No changes are required in application logic, demonstrating scalable design.
+
+**Key Requirements**
+1. Initialize room availability using a constructor.
+2. Store room availability using a HashMap.
+3. Provide methods to retrieve current availability.
+4. Support controlled updates to room availability.
+5. Ensure inventory state remains consistent across operations.
+
+**Key Benefits**
+1. Single source of truth for room availability
+2. Constant-time inventory access and updates
+3. Improved scalability when introducing new room types
+
+**Drawbacks of Previous Use Case**
+1. Availability was managed using independent variables.
+2. This approach does not scale and increases the risk of inconsistent system state as complexity grows.
