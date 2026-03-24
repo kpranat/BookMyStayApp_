@@ -119,3 +119,48 @@ Use Case 3: Centralized Room Inventory Management
 **Drawbacks of Previous Use Case**
 1. Availability was managed using independent variables.
 2. This approach does not scale and increases the risk of inconsistent system state as complexity grows.
+
+Use Case 4: Room Search & Availability Check
+-
+
+# Goal
+Enable guests to view available rooms and their details without modifying system state, reinforcing safe data access and clear separation of responsibilities.
+
+# Actor:
+
+**Guest –** initiates a search to view available room options.
+
+**Search Service –** handles read-only access to inventory and room information.
+
+# Flow:
+
+1. Guest initiates a room search request.
+2. The system retrieves availability data from the inventory.
+3. Room details and pricing are obtained from room objects.
+4. Unavailable room types are filtered out.
+5. Available room types and their details are displayed.
+6. System state remains unchanged.
+
+# Key Concepts Used
+1. Read-Only Access - Search operations are designed to read data without altering it. This prevents unintended side effects and ensures system stability.
+2. Defensive Programming - The search logic performs checks to ensure only valid and available room types are displayed. This protects the system from incorrect assumptions and invalid data usage.
+3. Separation of Concerns - Search functionality is isolated from inventory mutation and booking logic. This ensures that searching does not interfere with allocation or availability updates.
+4. Inventory as State Holder - Inventory is accessed only to retrieve current availability counts. No updates are performed during search operations.
+5. Domain Model Usage -  Room objects provide descriptive information such as pricing and amenities. This avoids duplicating room-related data in the inventory layer.
+6. Validation Logic - Room types with zero availability are excluded from the search results. This ensures that guests see only actionable options.
+
+# Key Requirements
+1. Retrieve room availability from the centralized inventory.
+2. Display only room types with availability greater than zero.
+3. Show room details and pricing using room domain objects.
+4. Ensure inventory data is not modified during search operations.
+5. Maintain a clear boundary between search logic and booking logic.
+
+# Key Benefits
+1. Accurate availability visibility without state mutation
+2. Reduced risk of accidental inventory corruption
+3. Clear separation between read-only and write operations
+
+# Drawbacks of Previous Use Case
+Use Case 3 introduced centralized inventory but did not differentiate between read and write access.
+Without explicit separation, inventory could be accidentally modified during non-booking operations.
