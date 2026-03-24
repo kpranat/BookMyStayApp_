@@ -1,6 +1,6 @@
-//use case 3
-//author - pranat
-//version 3.1
+//use case 4
+//author - kpranat
+//version 4.1
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,7 +38,7 @@ class SingleRoom extends room{
         System.out.println("Beds:" + numberOfbeds);
         System.out.println("Size" + squareFeet);
         System.out.println("Price Per Night:"+pricePerNight);
-        System.out.println("Available" + 5 + "\n");
+        System.out.println("Available:" + 5 + "\n");
     }
 }
 
@@ -61,7 +61,7 @@ class DoubleRoom extends room{
         System.out.println("Beds:" + numberOfbeds);
         System.out.println("Size" + squareFeet);
         System.out.println("Price Per Night:"+pricePerNight);
-        System.out.println("Available" + 3 + "\n");
+        System.out.println("Available:" + 3 + "\n");
     }
 }
 
@@ -84,7 +84,7 @@ class SuiteRoom extends room{
         System.out.println("Beds:" + numberOfbeds);
         System.out.println("Size" + squareFeet);
         System.out.println("Price Per Night:"+pricePerNight);
-        System.out.println("Available" + 2 + "\n");
+        System.out.println("Available:" + 2 + "\n");
     }
 }
 
@@ -136,15 +136,54 @@ class RoomInventory {
         roomAvailability.put(roomType,count);
     }
 }
-
 /**
  * =================================================
- * MAIN CLASS – UseCase3InventorySetup
+ * CLASS - RoomSearchService
  * =================================================
- * Use Case 3: Centralized Room Inventory Management
- * @version 3.1
+ * Use Case 4: Room Search & Availability Check
+ * @version 4.0
  */
-class UseCase3InventorySetup {
+
+class RoomSearchService{
+    public void searchAvailableRooms(){
+        RoomInventory inventory = new RoomInventory();
+        room SingleRoom = new SingleRoom();
+        room doubleRoom = new DoubleRoom();
+        room suiteRoom = new SuiteRoom();
+        Map<String,Integer> availability = inventory.getRoomAvailability();
+        System.out.println("\n====Room Search====");
+        if (availability.get("Single Room")>0){
+            System.out.println("SingleRoom:");
+            System.out.println("Beds:" + SingleRoom.numberOfbeds);
+            System.out.println("Size" + SingleRoom.squareFeet);
+            System.out.println("Price Per Night:"+SingleRoom.pricePerNight);
+            System.out.println("Available:" + availability.get("Single Room") + "\n");
+        }
+        if (availability.get("Suite Room")>0){
+            System.out.println("SuiteRoom:");
+            System.out.println("Beds:" + suiteRoom.numberOfbeds);
+            System.out.println("Size:" + suiteRoom.squareFeet);
+            System.out.println("Price Per Night:"+suiteRoom.pricePerNight);
+            System.out.println("Available:" + availability.get("Suite Room") + "\n");
+        }
+        if (availability.get("Double Room")>0){
+            System.out.println("DoubleRoom:");
+            System.out.println("Beds:" + doubleRoom.numberOfbeds);
+            System.out.println("Size:" + doubleRoom.squareFeet);
+            System.out.println("Price Per Night:"+doubleRoom.pricePerNight);
+            System.out.println("Available:" + availability.get("Double Room") + "\n");
+        }
+
+    }
+
+}
+
+/**
+ =================================
+ MIAN CLASS
+ =================================
+ **/
+public class BookMyStayApp {
 
     public static void main(String[] args){
 
@@ -177,5 +216,8 @@ class UseCase3InventorySetup {
         for(String roomType : availability.keySet()){
             System.out.println(roomType + " -> " + availability.get(roomType));
         }
+
+        RoomSearchService searchService = new RoomSearchService();
+        searchService.searchAvailableRooms();
     }
 }
