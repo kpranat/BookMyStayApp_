@@ -425,3 +425,44 @@ Enable safe cancellation of confirmed bookings by correctly reversing system sta
 # Drawbacks of Previous Use Case
 1. Use Case 9 focused on input validation but did not address reversing valid operations.
 2. Without rollback support, confirmed bookings could not be safely undone.
+
+Use Case 11: Concurrent Booking Simulation (Thread Safety)
+-
+
+# Goal: 
+Demonstrate how concurrent access to shared resources can lead to inconsistent system state and show how synchronization ensures correctness under multi-user conditions.
+
+# Actor:
+
+1. Multiple Guests – submit booking requests concurrently.
+2. Concurrent Booking Processor – processes booking requests in a multi-threaded environment.
+
+# Flow:
+
+1. Multiple guests submit booking requests simultaneously.
+2. Requests are added to a shared booking queue.
+3. Threads retrieve requests using synchronized access.
+4. Room allocation and inventory updates are performed inside critical sections.
+5. The system completes allocations without conflicts or inconsistencies.
+
+# Key Concepts Used
+1. Race Conditions - Race conditions occur when multiple threads access and modify shared data simultaneously. The final system state becomes dependent on execution timing rather than logic.
+2. Thread Safety - Thread safety ensures that shared resources behave correctly when accessed by multiple threads. This is critical in systems handling concurrent user actions.
+3. Shared Mutable State - The booking queue and inventory are shared across threads. Uncontrolled access to shared mutable data can corrupt system state.
+4. Critical Sections - Critical sections are blocks of code that must be executed by only one thread at a time. Synchronization ensures exclusive access to these sections.
+5. Synchronized Access - Synchronization mechanisms are used to protect shared resources. This prevents interleaving operations that could lead to double allocation.
+6. Concurrency vs. Parallelism - Concurrency focuses on correctness when tasks overlap in time. This use case emphasizes correctness over performance optimization.
+
+# Key Requirements
+1. Simulate multiple booking requests occurring at the same time.
+2. Use shared data structures for booking requests and inventory.
+3. Ensure inventory updates are performed in a thread-safe manner.
+4. Prevent double allocation under concurrent execution.
+5. Maintain consistent system state under load.
+# Key Benefits
+1. Safe multi-user booking simulation
+2. Correct room allocations under concurrent load
+3. Foundation for building scalable, multi-user systems
+# Drawbacks of Previous Use Case
+1. Earlier use cases assumed a single-threaded execution model.
+2. Such assumptions are unsafe in real production environments where concurrent access is common.
