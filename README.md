@@ -466,3 +466,48 @@ Demonstrate how concurrent access to shared resources can lead to inconsistent s
 # Drawbacks of Previous Use Case
 1. Earlier use cases assumed a single-threaded execution model.
 2. Such assumptions are unsafe in real production environments where concurrent access is common.
+
+Use Case 12: Data Persistence & System Recovery
+-
+
+# Goal: 
+Introduce persistence and recovery concepts by ensuring that critical system state survives application restarts, transitioning learners from in-memory thinking to durable system design.
+
+# Actor:
+
+1. System – initiates save and restore operations during shutdown and startup.
+2. Persistence Service – handles storing and retrieving system state from persistent storage.
+# Flow:
+
+1. The system prepares for shutdown.
+2. Current booking and inventory state is serialized into a persistent format.
+3. Serialized data is written to a file.
+4. System restarts.
+5. Persisted data is loaded from the file.
+6. Inventory and booking state are restored into memory.
+7. System resumes operation with recovered state.
+
+# Key Concepts Used
+1. Stateful Applications - A stateful application maintains data beyond a single execution cycle. Business systems must preserve state to ensure continuity and correctness.
+2. Persistence - Persistence refers to storing application state in a durable medium. This prevents data loss caused by restarts, crashes, or redeployments.
+3. Serialization - Serialization converts in-memory objects into a format suitable for storage. This allows complex data structures to be written to files and later reconstructed.
+4. Deserialization - Deserialization restores objects from persisted data back into memory. Correct deserialization is essential for accurate system recovery.
+5. Inventory Snapshot - The inventory state is captured at a point in time. Restoring this snapshot ensures availability reflects the last known valid state.
+6. Failure Tolerance - The system handles missing or corrupted persistence data safely. This prevents crashes and allows the application to start in a known, valid state.
+7. Preparation for Database Integration - File-based persistence introduces durability concepts without database complexity. This prepares learners conceptually for future database-backed systems.
+
+# Key Requirements
+1. Persist booking history and inventory state to a file.
+2. Restore persisted data during application startup.
+3. Ensure the restored state accurately reflects the last saved state.
+4. Handle missing or corrupted persistence files gracefully.
+5. Allow the system to continue operating safely after recovery.
+
+# Key Benefits
+1. No data loss across application restarts
+2. More realistic and production-aligned system behavior
+3. Smooth conceptual transition toward database-backed systems
+
+# Drawbacks of Previous Use Case
+1. Earlier use cases relied entirely on in-memory data structures.
+2. As a result, all business state was lost when the application terminated.
