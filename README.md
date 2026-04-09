@@ -294,3 +294,49 @@ Extend the booking model to support optional services, demonstrating how real-wo
 # Drawbacks of Previous Use Case
 1. Use Case 6 confirmed room allocation but treated bookings as static entities.
 2. Without add-on support, the system could not model common real-world booking enhancements.
+
+Use Case 8: Booking History & Reporting
+-
+
+# Goal: 
+Introduce historical tracking of confirmed bookings to provide operational visibility, enable audits, and support reporting, reinforcing a persistence-oriented mindset without introducing external storage.
+
+# Actor:
+
+1. Admin – reviews booking history and reports for operational purposes.
+2. Booking History – maintains a record of confirmed reservations.
+3. Booking Report Service – generates summaries and reports from stored booking data.
+
+# Flow:
+
+1. A booking is successfully confirmed.
+2. The confirmed reservation is added to booking history.
+3. Booking history maintains records in insertion order.
+4. Admin requests booking information or reports.
+5. Stored reservations are retrieved and displayed as required.
+
+# Key Concepts Used
+1. Operational Visibility - Real systems require visibility into past transactions.
+2. Historical data allows administrators to understand system usage and behavior.
+3. List Data Structure - A List<Reservation> is used to store confirmed bookings. Lists preserve insertion order, making them suitable for chronological records.
+4. Ordered Storage - Bookings are stored in the order they are confirmed. This naturally reflects real-world timelines and supports sequential reporting.
+5. Historical Tracking - Once stored, bookings form an audit trail. This enables later review, analysis, and verification of system actions.
+6. Reporting Readiness - Storing structured booking data prepares the system for reporting. Reports can be generated without reprocessing live booking flows.
+7. Separation of Data Storage and Reporting - Booking history focuses on storing data. Reporting logic is delegated to a separate service, reducing coupling.
+8. Persistence Mindset (Without Storage Medium) - Although data is stored in memory, the system treats history as long-lived information. This prepares learners conceptually for file-based or database persistence in later stages.
+
+# Key Requirements
+1. Store each confirmed reservation in booking history.
+2. Maintain bookings in the order they are confirmed.
+3. Allow retrieval of stored reservations for review.
+4. Generate summary reports from booking history.
+5. Ensure reporting does not modify stored booking data.
+
+# Key Benefits
+1. Complete and traceable booking audit trail
+2. Simplified reporting and administrative analysis
+3. Improved support for customer issue resolution
+
+# Drawbacks of Previous Use Case
+1. Use Case 7 extended booking functionality but did not retain historical data.
+2. Without booking history, completed transactions could not be reviewed or analyzed.
