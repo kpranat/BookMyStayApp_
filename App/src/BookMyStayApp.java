@@ -1,3 +1,9 @@
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -84,6 +90,7 @@ class RoomInventory {
 
     public RoomInventory() {
         roomAvailability = new HashMap<>();
+        // Default startup values
         roomAvailability.put("Single", 5);
         roomAvailability.put("Double", 3);
         roomAvailability.put("Suite", 2);
@@ -303,6 +310,51 @@ class ConcurrentBookingProcessor implements Runnable {
 
 /**
  * ===============================================
+ * USE CASE 12: File Persistence
+ * ===============================================
+ */
+class FilePersistenceService {
+    public void saveInventory(RoomInventory inventory, String filePath) {
+        try (PrintWriter writer = new PrintWriter(new FileWriter(filePath))) {
+            for (Map.Entry<String, Integer> entry : inventory.getRoomAvailability().entrySet()) {
+                writer.println(entry.getKey() + "=" + entry.getValue());
+            }
+            System.out.println("\nInventory saved successfully to " + filePath);
+        } catch (IOException e) {
+            System.out.println("Failed to save inventory: " + e.getMessage());
+        }
+    }
+
+    public void loadInventory(RoomInventory inventory, String filePath) {
+        File file = new File(filePath);
+        if (!file.exists()) {
+            System.out.println("No valid inventory data found. Starting fresh.");
+            return;
+        }
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            boolean dataLoaded = false;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split("=");
+                if (parts.length == 2) {
+                    String roomType = parts[0];
+                    int count = Integer.parseInt(parts[1]);
+                    inventory.updateAvailability(roomType, count);
+                    dataLoaded = true;
+                }
+            }
+            if (dataLoaded) {
+                System.out.println("Inventory successfully loaded from file.");
+            }
+        } catch (IOException | NumberFormatException e) {
+            System.out.println("No valid inventory data found. Starting fresh.");
+        }
+    }
+}
+
+/**
+ * ===============================================
  * MAIN APPLICATION FLOW
  * ===============================================
  */
@@ -314,6 +366,7 @@ public class BookMyStayApp {
 
         // Initialize Services
         RoomInventory inventory = new RoomInventory();
+        FilePersistenceService persistenceService = new FilePersistenceService();
         RoomSearchService searchService = new RoomSearchService();
         BookingRequestQueue bookingQueue = new BookingRequestQueue();
         RoomAllocationService allocationService = new RoomAllocationService();
@@ -323,33 +376,35 @@ public class BookMyStayApp {
         ReservationValidator validator = new ReservationValidator();
         CancellationService cancellationService = new CancellationService();
 
-        // Thread-safe map to keep track of who got which room for later steps
-        Map<String, String> guestToRoomIdMap = new ConcurrentHashMap<>();
+        String persistenceFilePath = "inventory_data.txt";
 
+        // --- STEP 1: System Recovery / Load Persistence (UC 12) ---
+        System.out.println("==== System Recovery ====");
+        persistenceService.loadInventory(inventory, persistenceFilePath);
         searchService.searchAvailableRooms(inventory);
 
-        // --- STEP 1: Validation & Adding to Queue (UC 9 & 5) ---
+        // --- STEP 2: Adding System Requests with Validation (UC 9 & 5) ---
         System.out.println("\n==== Adding System Requests ====");
-        try {
-            Reservation[] requests = {
-                    new Reservation("Abhi", "Single"),
-                    new Reservation("Vanmathi", "Double"),
-                    new Reservation("Kural", "Suite"),
-                    new Reservation("Subha", "Single"),
-                    new Reservation("InvalidUser", "Penthouse") // Will fail validation
-            };
+        Map<String, String> guestToRoomIdMap = new ConcurrentHashMap<>(); // Thread-safe map
 
-            for (Reservation req : requests) {
-                try {
-                    validator.validate(req.getGuestName(), req.getRoomType(), inventory);
-                    bookingQueue.addRequest(req);
-                } catch (InvalidBookingException e) {
-                    System.out.println("Validation failed for " + req.getGuestName() + ": " + e.getMessage());
-                }
+        Reservation[] requests = {
+                new Reservation("Abhi", "Single"),
+                new Reservation("Vanmathi", "Double"),
+                new Reservation("Kural", "Suite"),
+                new Reservation("Subha", "Single"),
+                new Reservation("InvalidUser", "Penthouse") // Will fail validation gracefully
+        };
+
+        for (Reservation req : requests) {
+            try {
+                validator.validate(req.getGuestName(), req.getRoomType(), inventory);
+                bookingQueue.addRequest(req);
+            } catch (InvalidBookingException e) {
+                System.out.println("Validation failed for " + req.getGuestName() + ": " + e.getMessage());
             }
-        } catch (Exception e) { e.printStackTrace(); }
+        }
 
-        // --- STEP 2: Concurrent Allocation (UC 11 & 6) ---
+        // --- STEP 3: Concurrent Allocation (UC 11 & 6) ---
         System.out.println("\n==== Starting Concurrent Processing ====");
         Thread t1 = new Thread(new ConcurrentBookingProcessor(
                 bookingQueue, inventory, allocationService, cancellationService, bookingHistory, guestToRoomIdMap), "Thread-1");
@@ -366,27 +421,29 @@ public class BookMyStayApp {
             System.out.println("Processing interrupted.");
         }
 
-        // --- STEP 3: Add-On Services (UC 7) ---
+        // --- STEP 4: Add-On Services (UC 7) ---
         System.out.println("\n==== Selecting Add-On Services ====");
         AddOnService breakfast = new AddOnService("Breakfast Buffet", 25.0);
         String abhiRoom = guestToRoomIdMap.get("Abhi");
         if (abhiRoom != null) addOnManager.addService(abhiRoom, breakfast);
 
-        // --- STEP 4: Cancellation & Rollback (UC 10) ---
+        // --- STEP 5: Cancellation & Rollback (UC 10) ---
         System.out.println("\n==== Processing Cancellations ====");
         String subhaRoom = guestToRoomIdMap.get("Subha");
         if (subhaRoom != null) {
             cancellationService.cancelBooking(subhaRoom, inventory);
         }
 
-        // --- STEP 5: Reporting (UC 8 & 10) ---
+        // --- STEP 6: Reporting (UC 8 & 10) ---
         reportService.generateReport(bookingHistory);
         cancellationService.showRollbackHistory();
 
-        // --- Final State Check ---
+        // --- STEP 7: Save System State (UC 12) ---
         System.out.println("\n==== Final Inventory Status ====");
         for (String type : inventory.getRoomAvailability().keySet()) {
             System.out.println(type + " -> " + inventory.getRoomAvailability().get(type));
         }
+
+        persistenceService.saveInventory(inventory, persistenceFilePath);
     }
 }
