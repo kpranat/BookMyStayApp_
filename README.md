@@ -209,3 +209,48 @@ Booking Request Queue – manages and orders incoming booking requests.
 # Drawbacks of Previous Use Case
 1. Use Case 4 allowed room visibility but did not handle booking intent.
 2. Without a request intake mechanism, simultaneous booking attempts could not be managed fairly.
+
+Use Case 6: Reservation Confirmation & Room Allocation
+-
+
+# Goal: 
+
+Confirm booking requests by assigning rooms safely while ensuring inventory consistency and preventing double-booking under all circumstances.
+
+# Actor:
+
+1. Booking Service – processes queued booking requests and performs room allocation.
+2. Inventory Service – maintains and updates room availability state.
+
+# Flow:
+
+1. Booking request is dequeued from the request queue.
+2. The system checks availability for the requested room type.
+3. A unique room ID is generated and assigned.
+4. The room ID is recorded to prevent reuse.
+5. Inventory count is decremented immediately.
+6. Reservation is confirmed.
+
+# Key Concepts Used
+1. Problem of Double Booking - Without controlled allocation, the same room may be assigned to multiple guests. This results in room ID collisions and inconsistent system state.
+2. Set Data Structure - A Set<String> is used to store allocated room IDs. Sets enforce uniqueness by design, preventing duplicate room assignments.
+3. Uniqueness Enforcement - By checking against an existing set of room IDs, the system guarantees that no room is assigned more than once. This removes the need for manual duplicate checks.
+4. Mapping Room Types to Assigned Rooms - A HashMap<String, Set<String>> maps each room type to its allocated room IDs. This allows grouped tracking and simplifies validation and reporting.
+5. Atomic Logical Operations - Room allocation is treated as a single logical unit. Assignment and inventory update occur together to avoid partial or inconsistent state.
+6. Inventory Synchronization - Inventory is updated immediately after allocation. This ensures that availability reflects the current system state at all times.
+
+# Key Requirements
+1. Retrieve booking requests from the queue in FIFO order.
+2. Generate and assign a unique room ID for each confirmed reservation.
+3. Prevent reuse of room IDs across all allocations.
+4. Update inventory immediately after successful allocation.
+5. Ensure allocation logic maintains system consistency.
+
+# Key Benefits
+1. Guaranteed uniqueness of room assignments
+2. Immediate synchronization between booking and inventory
+3. Elimination of double-booking scenarios
+
+# Drawbacks of Previous Use Case
+1. Use Case 5 handled request ordering but did not confirm bookings.
+2. Without allocation and uniqueness enforcement, queued requests could still result in conflicting assignments.
