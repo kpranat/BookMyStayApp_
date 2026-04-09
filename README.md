@@ -254,3 +254,43 @@ Confirm booking requests by assigning rooms safely while ensuring inventory cons
 # Drawbacks of Previous Use Case
 1. Use Case 5 handled request ordering but did not confirm bookings.
 2. Without allocation and uniqueness enforcement, queued requests could still result in conflicting assignments.
+
+Use Case 7: Add-On Service Selection
+-
+
+# Goal: 
+Extend the booking model to support optional services, demonstrating how real-world business features can be added without modifying core booking or allocation logic.
+
+# Actor:
+1. Guest – selects optional services for an existing reservation.
+2. Add-On Service – represents an individual optional offering.
+3. Add-On Service Manager – manages the association between reservations and selected services.
+
+# Flow:
+
+1. Guest selects one or more add-on services.
+2. Selected services are added to a list.
+3. The list of services is mapped to the corresponding reservation ID.
+4. Additional cost for the reservation is calculated.
+5. Core booking and inventory state remain unchanged.
+
+# Key Concepts Used
+1. Business Extensibility - Real-world bookings often include additional offerings beyond the primary product. The system must support new features without disrupting existing logic.
+2. One-to-Many Relationship - A single reservation can have multiple associated services. This relationship is modeled using a map from reservation ID to a list of services.
+3. Map and List Combination - Map<String, List<Service>> allows efficient lookup of services for a reservation. Lists preserve insertion order and allow multiple services to be attached.
+4. Composition over Inheritance - Services are composed with reservations rather than inherited. This avoids rigid class hierarchies and supports flexible feature growth.
+5. Separation of Core and Optional Features - Add-on services are managed independently of room allocation and inventory. This prevents optional features from complicating critical booking workflows.
+6. Cost Aggregation - Service costs are calculated separately and combined when needed. This keeps pricing logic modular and easier to extend.
+# Key Requirements
+1. Allow multiple services to be attached to a single reservation.
+2. Store selected services using a reservation-to-services mapping.
+3. Calculate total additional cost for selected services.
+4. Ensure add-on logic does not modify booking or inventory state.
+5. Support easy addition of new service types.
+# Key Benefits
+1. Flexible attachment of optional services to reservations
+2. Clean mapping between bookings and value-added features
+3. Easy expansion of services without core booking changes
+# Drawbacks of Previous Use Case
+1. Use Case 6 confirmed room allocation but treated bookings as static entities.
+2. Without add-on support, the system could not model common real-world booking enhancements.
